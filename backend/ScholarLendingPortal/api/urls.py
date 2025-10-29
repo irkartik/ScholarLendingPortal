@@ -3,6 +3,7 @@ from . import views
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
+router.register(r'equipment', views.EquipmentViewSet, basename='equipment')
 
 urlpatterns = [
     path('auth/register/', views.register, name='register'),

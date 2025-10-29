@@ -46,3 +46,28 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError('Must include "username" and "password".')
 
         return data
+
+class EquipmentSerializer(serializers.ModelSerializer):
+    """Serializer for Equipment model"""
+    is_available = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Equipment
+        fields = [
+            'id', 'name', 'category', 'description', 'condition',
+            'quantity', 'available_quantity', 'is_available',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate(self, data):
+        # Ensure available_quantity doesn't exceed quantity
+        quantity = data.get('quantity', self.instance.quantity if self.instance else 0)
+        available_quantity = data.get('available_quantity', self.instance.available_quantity if self.instance else 0)
+
+        if available_quantity > quantity:
+            raise serializers.ValidationError({
+                'available_quantity': 'Available quantity cannot exceed total quantity.'
+            })
+
+        return data
