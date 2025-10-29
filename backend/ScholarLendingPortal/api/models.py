@@ -59,37 +59,36 @@ class Equipment(models.Model):
         verbose_name_plural = 'Equipment'
         ordering = ['-created_at']
 
+class BorrowRequest(models.Model):
+    """Model representing a borrow request for equipment"""
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('issued', 'Issued'),
+        ('returned', 'Returned'),
+    )
 
-    class BorrowRequest(models.Model):
-        """Model representing a borrow request for equipment"""
-        STATUS_CHOICES = (
-            ('pending', 'Pending'),
-            ('approved', 'Approved'),
-            ('rejected', 'Rejected'),
-            ('issued', 'Issued'),
-            ('returned', 'Returned'),
-        )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="borrow_requests")
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
-        user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="borrow_requests")
-        equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
-        quantity = models.PositiveIntegerField(default=1)
-        status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    request_date = models.DateTimeField(auto_now_add=True)
+    borrow_from = models.DateTimeField()
+    borrow_to = models.DateTimeField()
 
-        request_date = models.DateTimeField(auto_now_add=True)
-        borrow_from = models.DateTimeField()
-        borrow_to = models.DateTimeField()
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_requests")
+    approved_date = models.DateTimeField(null=True, blank=True)
 
-        approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_requests")
-        approved_date = models.DateTimeField(null=True, blank=True)
+    purpose = models.TextField(blank=True, null=True)
+    rejection_reason = models.TextField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
 
-        purpose = models.TextField(blank=True, null=True)
-        rejection_reason = models.TextField(blank=True, null=True)
-        notes = models.TextField(blank=True, null=True)
+    def __str__(self):
+        return f"{self.user.username} - {self.equipment.name} ({self.status})"
 
-        def __str__(self):
-            return f"{self.user.username} - {self.equipment.name} ({self.status})"
-
-        class Meta:
-            verbose_name = 'Borrow Request'
-            verbose_name_plural = 'Borrow Requests'
-            ordering = ['-request_date']
+    class Meta:
+        verbose_name = 'Borrow Request'
+        verbose_name_plural = 'Borrow Requests'
+        ordering = ['-request_date']

@@ -30,6 +30,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+AUTH_USER_MODEL = 'api.User'
+
 INSTALLED_APPS = [
     'api',
     'rest_framework',
