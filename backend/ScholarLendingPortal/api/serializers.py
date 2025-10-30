@@ -25,6 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return user
 
+
 class LoginSerializer(serializers.Serializer):
     """Serializer for user login"""
     username = serializers.CharField()
@@ -46,6 +47,7 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError('Must include "username" and "password".')
 
         return data
+
 
 class EquipmentSerializer(serializers.ModelSerializer):
     """Serializer for Equipment model"""
@@ -71,3 +73,108 @@ class EquipmentSerializer(serializers.ModelSerializer):
             })
 
         return data
+
+
+class BorrowRequestSerializer(serializers.ModelSerializer):
+    """Serializer for BorrowRequest model"""
+    user_details = UserSerializer(source='user', read_only=True)
+    equipment_details = EquipmentSerializer(source='equipment', read_only=True)
+    approved_by_details = UserSerializer(source='approved_by', read_only=True)
+
+    class Meta:
+        model = BorrowRequest
+        fields = [
+            'id', 'user', 'equipment', 'quantity', 'status',
+            'request_date', 'borrow_from', 'borrow_to',
+            'approved_by', 'approved_date', 'issued_date', 'returned_date',
+            'purpose', 'rejection_reason', 'notes',
+            'user_details', 'equipment_details', 'approved_by_details'
+        ]
+        read_only_fields = [
+            'id', 'request_date', 'approved_by', 'approved_date',
+            'issued_date', 'returned_date'
+        ]
+
+    def validate(self, data):
+        borrow_from = data.get('borrow_from')
+        borrow_to = data.get('borrow_to')
+
+        # Validate dates
+        if borrow_from and borrow_to:
+            if borrow_to < borrow_from:
+                raise serializers.ValidationError({
+                    'borrow_to': 'End date must be after start date.'
+                })
+
+            if borrow_from < date.today():
+                raise serializers.ValidationError({
+                    'borrow_from': 'Start date cannot be in the past.'
+                })
+
+        # Validate quantity
+        equipment = data.get('equipment', self.instance.equipment if self.instance else None)
+        quantity = data.get('quantity', 1)
+
+        if equipment and quantity > equipment.available_quantity:
+            raise serializers.ValidationError({
+                'quantity': f'Only {equipment.available_quantity} items available.'
+            })
+
+        return data
+
+
+class BorrowRequestCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating borrow requests"""
+
+    class Meta:
+        model = BorrowRequest
+        fields = ['equipment', 'quantity', 'borrow_from', 'borrow_to', 'purpose']
+
+    def validate(self, data):
+        borrow_from = data.get('borrow_from')
+        borrow_to = data.get('borrow_to')
+
+        if borrow_to < borrow_from:
+            raise serializers.ValidationError({
+                'borrow_to': 'End date must be after start date.'
+            })
+
+        if borrow_from < date.today():
+            raise serializers.ValidationError({
+                'borrow_from': 'Start date cannot be in the past.'
+            })
+
+        # Check equipment availability
+        equipment = data.get('equipment')
+        quantity = data.get('quantity', 1)
+
+        if quantity > equipment.quantity:
+            raise serializers.ValidationError({
+                'quantity': f'Only {equipment.quantity} total items exist.'
+            })
+
+        # Check for overlapping approved/issued requests
+        overlapping = BorrowRequest.objects.filter(
+            equipment=equipment,
+            status__in=['approved', 'issued'],
+            borrow_from__lte=borrow_to,
+            borrow_to__gte=borrow_from
+        )
+
+        total_requested = sum(req.quantity for req in overlapping)
+
+        if total_requested + quantity > equipment.quantity:
+            available = equipment.quantity - total_requested
+            raise serializers.ValidationError({
+                'quantity': f'Only {available} items available for the requested period.'
+            })
+
+        return data
+
+
+class ApproveRejectSerializer(serializers.Serializer):
+    """Serializer for approving/rejecting requests"""
+    action = serializers.ChoiceField(choices=['approve', 'reject'])
+    rejection_reason = serializers.CharField(required=False, allow_blank=True)
+    notes = serializers.CharField(required=False, allow_blank=True)
+
