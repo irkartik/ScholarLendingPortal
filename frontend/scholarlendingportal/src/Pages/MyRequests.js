@@ -115,7 +115,9 @@ function MyRequests() {
                 </table>
 
                 {requests.length === 0 && (
-                    <p>No borrow requests found. Go to <a href="/equipment">Equipment</a> to make a request.</p>
+                    <div style={{textAlign: 'center', padding: '3rem', background: 'var(--card-bg)', borderRadius: '0.75rem', marginTop: '2rem'}}>
+                        <p style={{fontSize: '1.125rem', color: 'var(--text-secondary)'}}>No borrow requests found. Go to <a href="/equipment" style={{color: 'var(--primary-color)', fontWeight: '600'}}>Equipment</a> to make a request.</p>
+                    </div>
                 )}
             </div>
         </div>

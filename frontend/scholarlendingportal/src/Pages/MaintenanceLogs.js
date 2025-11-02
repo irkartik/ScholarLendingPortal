@@ -204,11 +204,10 @@ function MaintenanceLogs() {
             <div className="container">
                 <h1>Maintenance Logs</h1>
 
-                <div className="filter-section" style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div className="filters">
                     <select
                         value={filterEquipment}
                         onChange={(e) => setFilterEquipment(e.target.value)}
-                        style={{ padding: '8px' }}
                     >
                         <option value="">All Equipment</option>
                         {equipment.map((item) => (
@@ -219,7 +218,6 @@ function MaintenanceLogs() {
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value)}
-                        style={{ padding: '8px' }}
                     >
                         <option value="">All Types</option>
                         <option value="damage">Damage Report</option>
@@ -251,7 +249,7 @@ function MaintenanceLogs() {
                     <tbody>
                     {logs.length === 0 ? (
                         <tr>
-                            <td colSpan="7" style={{ textAlign: 'center' }}>No maintenance logs found</td>
+                            <td colSpan="7" style={{textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)'}}>No maintenance logs found</td>
                         </tr>
                     ) : (
                         logs.map((log) => (
