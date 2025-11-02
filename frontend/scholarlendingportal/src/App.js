@@ -7,6 +7,8 @@ import EquipmentList from './Pages/EquipmentList';
 import EquipmentManage from './Pages/EquipmentManage';
 import BorrowRequests from './Pages/BorrowRequests';
 import MyRequests from './Pages/MyRequests';
+import MaintenanceLogs from './Pages/MaintenanceLogs';
+
 import './App.css';
 
 function App() {
@@ -22,6 +24,7 @@ function App() {
                     <Route path="/equipment-manage" element={<EquipmentManage />} />
                     <Route path="/borrow-requests" element={<BorrowRequests />} />
                     <Route path="/my-requests" element={<MyRequests />} />
+                    <Route path="/maintenance-logs" element={<MaintenanceLogs />} />
                 </Routes>
             </div>
         </BrowserRouter>
