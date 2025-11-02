@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Equipment, BorrowRequest
+from .models import User, Equipment, BorrowRequest, MaintenanceLog
 
 
 @admin.register(User)
@@ -73,3 +73,22 @@ class BorrowRequestAdmin(admin.ModelAdmin):
             return self.readonly_fields + ('user', 'equipment')
         return self.readonly_fields
 
+@admin.register(MaintenanceLog)
+class MaintenanceLogAdmin(admin.ModelAdmin):
+    """Admin configuration for MaintenanceLog model"""
+    list_display = ['equipment', 'log_type', 'reported_by', 'reported_date', 'cost']
+    list_filter = ['log_type', 'reported_date']
+    search_fields = ['equipment__name', 'description', 'reported_by__username']
+    readonly_fields = ['reported_date']
+
+    fieldsets = (
+        ('Log Information', {
+            'fields': ('equipment', 'log_type', 'description')
+        }),
+        ('Reporter Information', {
+            'fields': ('reported_by', 'reported_date')
+        }),
+        ('Financial', {
+            'fields': ('cost',)
+        }),
+    )

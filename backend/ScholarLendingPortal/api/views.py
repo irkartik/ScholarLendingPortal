@@ -6,11 +6,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.utils import timezone
 from django.db.models import Q
-from .models import User, Equipment, BorrowRequest
+from .models import User, Equipment, BorrowRequest, MaintenanceLog
 from .serializers import (
     UserSerializer, LoginSerializer, EquipmentSerializer,
     BorrowRequestSerializer, BorrowRequestCreateSerializer,
-    ApproveRejectSerializer
+    ApproveRejectSerializer, MaintenanceLogSerializer
 )
 from .permissions import IsAdmin, IsStaffOrAdmin
 
@@ -301,6 +301,33 @@ class BorrowRequestViewSet(viewsets.ModelViewSet):
         requests = BorrowRequest.objects.filter(status='pending')
         serializer = BorrowRequestSerializer(requests, many=True)
         return Response(serializer.data)
+
+class MaintenanceLogViewSet(viewsets.ModelViewSet):
+    """ViewSet for MaintenanceLog operations"""
+    queryset = MaintenanceLog.objects.all()
+    serializer_class = MaintenanceLogSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Filter logs based on query parameters"""
+        queryset = MaintenanceLog.objects.all()
+
+        # Filter by equipment
+        equipment_id = self.request.query_params.get('equipment', None)
+        if equipment_id:
+            queryset = queryset.filter(equipment_id=equipment_id)
+
+        # Filter by log type
+        log_type = self.request.query_params.get('log_type', None)
+        if log_type:
+            queryset = queryset.filter(log_type=log_type)
+
+        return queryset.select_related('equipment', 'reported_by')
+
+    def perform_create(self, serializer):
+        """Create a new maintenance log"""
+        serializer.save(reported_by=self.request.user)
+
 
 
 @api_view(['GET'])

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-from .models import User, Equipment, BorrowRequest
+from .models import User, Equipment, BorrowRequest, MaintenanceLog
 from datetime import date
 
 
@@ -177,4 +177,18 @@ class ApproveRejectSerializer(serializers.Serializer):
     action = serializers.ChoiceField(choices=['approve', 'reject'], required=False)
     rejection_reason = serializers.CharField(required=False, allow_blank=True)
     notes = serializers.CharField(required=False, allow_blank=True)
+
+class MaintenanceLogSerializer(serializers.ModelSerializer):
+    """Serializer for MaintenanceLog model"""
+    equipment_details = EquipmentSerializer(source='equipment', read_only=True)
+    reported_by_details = UserSerializer(source='reported_by', read_only=True)
+
+    class Meta:
+        model = MaintenanceLog
+        fields = [
+            'id', 'equipment', 'log_type', 'description',
+            'reported_by', 'reported_date', 'cost',
+            'equipment_details', 'reported_by_details'
+        ]
+        read_only_fields = ['id', 'reported_date', 'reported_by']
 

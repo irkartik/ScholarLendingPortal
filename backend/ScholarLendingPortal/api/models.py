@@ -140,3 +140,25 @@ class BorrowRequest(models.Model):
         verbose_name_plural = 'Borrow Requests'
         ordering = ['-request_date']
 
+class MaintenanceLog(models.Model):
+    """Maintenance log for tracking damage and repairs"""
+    LOG_TYPE_CHOICES = (
+        ('damage', 'Damage Report'),
+        ('repair', 'Repair'),
+        ('inspection', 'Inspection'),
+    )
+
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, related_name='maintenance_logs')
+    log_type = models.CharField(max_length=20, choices=LOG_TYPE_CHOICES)
+    description = models.TextField()
+    reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='reported_logs')
+    reported_date = models.DateTimeField(auto_now_add=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.equipment.name} - {self.get_log_type_display()} ({self.reported_date.strftime('%Y-%m-%d')})"
+
+    class Meta:
+        verbose_name = 'Maintenance Log'
+        verbose_name_plural = 'Maintenance Logs'
+        ordering = ['-reported_date']

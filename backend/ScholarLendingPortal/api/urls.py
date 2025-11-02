@@ -5,6 +5,7 @@ from . import views
 router = DefaultRouter()
 router.register(r'equipment', views.EquipmentViewSet, basename='equipment')
 router.register(r'borrow-requests', views.BorrowRequestViewSet, basename='borrow-request')
+router.register(r'maintenance-logs', views.MaintenanceLogViewSet, basename='maintenance-log')
 
 urlpatterns = [
     path('', include(router.urls)),
