@@ -1,8 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './Pages/Login';
-import Register from "./Pages/Register";
-import Dashboard from "./Pages/Dashboard";
+import Register from './Pages/Register';
+import Dashboard from './Pages/Dashboard';
+import EquipmentList from './Pages/EquipmentList';
+import EquipmentManage from './Pages/EquipmentManage';
+import BorrowRequests from './Pages/BorrowRequests';
+import MyRequests from './Pages/MyRequests';
 import './App.css';
 
 function App() {
@@ -14,6 +18,10 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/equipment" element={<EquipmentList />} />
+                    <Route path="/equipment-manage" element={<EquipmentManage />} />
+                    <Route path="/borrow-requests" element={<BorrowRequests />} />
+                    <Route path="/my-requests" element={<MyRequests />} />
                 </Routes>
             </div>
         </BrowserRouter>
@@ -21,3 +29,4 @@ function App() {
 }
 
 export default App;
+
