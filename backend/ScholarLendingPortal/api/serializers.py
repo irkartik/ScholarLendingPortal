@@ -174,7 +174,7 @@ class BorrowRequestCreateSerializer(serializers.ModelSerializer):
 
 class ApproveRejectSerializer(serializers.Serializer):
     """Serializer for approving/rejecting requests"""
-    action = serializers.ChoiceField(choices=['approve', 'reject'])
+    action = serializers.ChoiceField(choices=['approve', 'reject'], required=False)
     rejection_reason = serializers.CharField(required=False, allow_blank=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
